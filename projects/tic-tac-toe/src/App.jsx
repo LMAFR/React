@@ -8,8 +8,18 @@ import { WinnerModal } from './components/WinnerModal'
 
 function App() {
   
-  const [board, setBoard] = useState(Array(9).fill(null))
-  const [turn, setTurn] = useState(TURNS.X)
+  const [board, setBoard] = useState(() => {
+    const boardFromStorage = window.localStorage.getItem('board')
+    return boardFromStorage ? JSON.parse(boardFromStorage) : Array(9).fill(null)
+  })
+  const [turn, setTurn] = useState(() => {
+    const turnFromStorage = window.localStorage.getItem('turn')
+    // As 'turn' in localStorage is a string ('x' or 'o'), we can directly return it if exists
+    //  (without parsing) or return the default value to start the game if not,
+    //  so we use ?? instead of ternary condition
+    return turnFromStorage ?? TURNS.X
+    // ??: if the left hand variable is null or undefined, return de right hand side
+    })
   // Let's say null equals no winner.
   const [winner, setWinner] = useState(null)
 
@@ -26,6 +36,9 @@ function App() {
     const newTurn = turn === TURNS.X ? TURNS.O : TURNS.X 
     setTurn(newTurn)
 
+    // Save current state of game:
+    window.localStorage.setItem('board', JSON.stringify(newBoard))
+    window.localStorage.setItem('turn', newTurn)
     // Check if there is a winner
     const newWinner = checkWinner(newBoard)
     if (newWinner) {
@@ -42,6 +55,9 @@ function App() {
     setBoard(Array(9).fill(null))
     setTurn(TURNS.X)
     setWinner(null)
+
+    window.localStorage.removeItem('board')
+    window.localStorage.removeItem('turn')
   }
 
   return (
