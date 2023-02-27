@@ -1,18 +1,24 @@
-import wResults from '../mocks/w_results.json'
-import woResults from '../mocks/wo_results.json'
+import { useState } from 'react'
+import { searchMovies } from '../services/movies'
 
-export function useMovies() {
-    const movies = wResults.Search
+export function useMovies({ search }) {
+    const [movies, setMovies] = useState([])
+    const [error, setError] = useState(null)
+    const [loading, setLoading] = useState(false)
 
-    // To avoid problems due to possible changes in the third-party API
-    // we will create our own interface (so this will be the only element
-    // we would have to change if the API results change)
-    const mappedMovies = movies.map(movie => ({
-        id: movie.imdbID,
-        title: movie.Title,
-        year: movie.Year,
-        poster: movie.Poster
-    }))
+    const getMovies = async() => {
+        try {
+            setLoading(true)
+            setError(null)
+            const newMovies = await searchMovies({ search })
+            setMovies(newMovies)
+        } catch (e) {
+            setError(e.message)
+        } finally {
+            // finally is what is done for both try and catch after their code finish
+            setLoading(false)
+        }
+    }
 
-    return { movies: mappedMovies }
+    return { movies, getMovies, loading }
 }
