@@ -1,13 +1,13 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useMemo, useCallback } from 'react'
 import { searchMovies } from '../services/movies'
 
-export function useMovies({ search }) {
+export function useMovies({ search, sort }) {
     const [movies, setMovies] = useState([])
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(false)
     const previousSearch = useRef(search)
 
-    const getMovies = async() => {
+    const getMovies = useCallback(async({ search }) => {
         if (previousSearch.current === search) return
 
         try {
@@ -22,7 +22,17 @@ export function useMovies({ search }) {
             // finally is what is done for both try and catch after their code finish
             setLoading(false)
         }
-    }
+    }, [])
 
-    return { movies, getMovies, loading }
+    const sortedMovies = useMemo(() => {
+        console.log('memoSortedMovies')
+        return sort
+            //   localeCompare help us in alphabetic sorting because using it a and
+            //  á are near in the list (not a-z and then á, â, ä, etc)
+            ?
+            [...movies].sort((a, b) => a.title.localeCompare(b.title)) :
+            movies
+    }, [sort, movies])
+
+    return { movies: sortedMovies, getMovies, loading }
 }
