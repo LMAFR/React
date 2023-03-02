@@ -39,3 +39,12 @@
     object-fit: cover;
     background: #fff;
 }
+
+.removeItemButton {
+    background-color: rgb(245, 95, 95);
+}
+
+.addItemButton {
+    background-color: rgb(136, 136, 244);
+    color: white;
+}
