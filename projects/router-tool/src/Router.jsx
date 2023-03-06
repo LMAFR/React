@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Children } from 'react'
 import { EVENTS } from './const'
 import { match } from 'path-to-regexp'
 
-export function Router ({ routes = [], defaultComponent: DefaultComponent = () => <h1>404</h1> }) {
+export function Router ({ children, routes = [], defaultComponent: DefaultComponent = () => <h1>404</h1> }) {
   const [currentPath, setCurrentPath] = useState(window.location.pathname)
   useEffect(() => {
     const onLocationChange = () => {
@@ -20,7 +20,16 @@ export function Router ({ routes = [], defaultComponent: DefaultComponent = () =
 
   let routeParams = {}
 
-  const Page = routes.find(({ path }) => {
+  const routesFromChildren = Children.map(children, ({ props, type }) => {
+    const { name } = type
+    const isRoute = name === 'Route'
+
+    return isRoute ? props : null
+  })
+  // The result of a map is an array, so now we can filter
+  const routesToUse = routes.concat(routesFromChildren)
+
+  const Page = routesToUse.find(({ path }) => {
     if (path === currentPath) return true
 
     // If path !== currentPath, then could by a dynamic URL
