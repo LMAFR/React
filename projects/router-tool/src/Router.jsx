@@ -27,7 +27,7 @@ export function Router ({ children, routes = [], defaultComponent: DefaultCompon
     return isRoute ? props : null
   })
   // The result of a map is an array, so now we can filter
-  const routesToUse = routes.concat(routesFromChildren)
+  const routesToUse = routes.concat(routesFromChildren).filter(Boolean)
 
   const Page = routesToUse.find(({ path }) => {
     if (path === currentPath) return true
