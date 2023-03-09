@@ -1,7 +1,9 @@
-import { render, screen, cleanup } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { Router } from './Router'
+import { Router } from './Router.jsx'
 import { getCurrentPath } from './utils.js'
+import { Link } from './Link.jsx'
+import { Route } from './Route.jsx'
 
 vi.mock('./utils.js', () => ({
   getCurrentPath: vi.fn()
@@ -25,7 +27,7 @@ describe('Router', () => {
   })
 
   it('Should render the component of the first route that matches', () => {
-    getCurrentPath.mockReturnValue('/')
+    getCurrentPath.mockReturnValue('/about')
 
     const routes = [
       {
@@ -38,6 +40,35 @@ describe('Router', () => {
       }
     ]
     render(<Router routes={routes} />)
-    expect(screen.getByText('Home')).toBeTruthy()
+    expect(screen.getByText('About')).toBeTruthy()
+  })
+
+  it('Should navigate using Links', async () => {
+    getCurrentPath.mockReturnValueOnce('/')
+
+    render(
+      <Router>
+        <Route
+          path='/' Component={() => {
+            return (
+              <>
+                <h1>Home</h1>
+                <Link to='/about'>Go to About</Link>
+              </>
+            )
+          }}
+        />
+        <Route path='/about' Component={() => <h1>About</h1>} />
+      </Router>
+    )
+
+    // Click on the link
+    const button = screen.getByText(/Go to About/)
+    fireEvent.click(button)
+
+    const aboutTitle = await screen.findByText('About')
+
+    // Check that new route is rendered
+    expect(aboutTitle).toBeTruthy()
   })
 })
